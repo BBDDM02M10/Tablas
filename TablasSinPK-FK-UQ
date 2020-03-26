@@ -1,0 +1,105 @@
+-- MySQL Workbench Synchronization
+-- Generated: 2020-02-26 16:58
+-- Model: New Model
+-- Version: 1.0
+-- Project: Name of the project
+-- Author: robert
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+CREATE SCHEMA IF NOT EXISTS `eleccions_generals2` DEFAULT CHARACTER SET utf8 ;
+
+/*Notas*/
+/*Elimidado las PK, FK, UQ*/
+/*Eliminado campo nom de la tabla eleccions*/
+/*Eliminado campo codigo_ine de la tabla municipis*/
+/*Eliminacio tabla partits*/
+/*Eliminado tabla personas*/
+
+CREATE TABLE IF NOT EXISTS `eleccions_generals2`.`comunitats_autonomes` (
+  `comunitat_aut_id` TINYINT(3) UNSIGNED NOT NULL,
+  `nom` VARCHAR(45) NOT NULL,
+  `codi_ine` CHAR(2) NOT NULL)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `eleccions_generals2`.`provincies` (
+  `provincia_id` TINYINT(3) UNSIGNED NOT NULL,
+  `nom` VARCHAR(45) NULL DEFAULT NULL,
+  `codi_ine` CHAR(2) NOT NULL,
+  `comunitat_aut_id` TINYINT(3) UNSIGNED NOT NULL)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `eleccions_generals2`.`municipis` (
+  `municipi_id` SMALLINT(5) UNSIGNED NOT NULL,
+  `nom` VARCHAR(50) NULL DEFAULT NULL,
+  `provincia_id` TINYINT(3) UNSIGNED NOT NULL,
+  `districte` CHAR(2) NULL DEFAULT NULL COMMENT  /* comment truncated */ /*Número de districte municipal , sinó el seu valor serà 99 si és el total municipal*/)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `eleccions_generals2`.`eleccions` (
+  `eleccio_id` TINYINT(3) UNSIGNED NOT NULL,
+  `any` YEAR NOT NULL COMMENT  /* comment truncated */ /*any el qual s'han celebrat les eleccions*/,
+  `mes` TINYINT(3) UNSIGNED NOT NULL COMMENT  /* comment truncated */ /*El mes que s'han celebrat les eleccions*/,
+  `data` DATE NOT NULL COMMENT  /* comment truncated */ /*Data (dia mes i any) de quan s'han celebrat les eleccions*/,
+  UNIQUE INDEX `uk_eleccions_any_mes` USING BTREE (`any`, `mes`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `eleccions_generals2`.`eleccions_municipis` (
+  `eleccio_municipi_id` INT(10) UNSIGNED NOT NULL,
+  `eleccio_id` TINYINT(3) UNSIGNED NOT NULL,
+  `municipi_id` SMALLINT(5) UNSIGNED NOT NULL,
+  `num_meses` SMALLINT(5) UNSIGNED NULL DEFAULT NULL,
+  `poblacio` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `cens` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `vots_emesos` INT(10) UNSIGNED NULL DEFAULT NULL COMMENT  /* comment truncated */ /*Número total de vots realitzats en el municipi*/,
+  `vots_valids` INT(10) UNSIGNED NULL DEFAULT NULL COMMENT  /* comment truncated */ /*Número de vots es que tindran en compte: vots a candidatures + vots nuls*/,
+  `vots_candidatures` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `vots_blanc` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `vots_nuls` INT(10) UNSIGNED NULL DEFAULT NULL,
+  UNIQUE INDEX `uk_eleccions_municipis` (`eleccio_id` ASC, `municipi_id` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `eleccions_generals2`.`candidatures` (
+  `candidatura_id` INT(10) UNSIGNED NOT NULL,
+  `eleccio_id` TINYINT(3) UNSIGNED NOT NULL,
+  `partit_id` SMALLINT(5) UNSIGNED NOT NULL,
+  `nom_curt` VARCHAR(50) NULL DEFAULT NULL,
+  `nom_llarg` VARCHAR(100) NULL DEFAULT NULL,
+  `codi_acumulacio_provincia` CHAR(6) NULL DEFAULT NULL COMMENT  /* comment truncated */ /*Codi de la candidatura d'acumulació a nivell provincial.*/,
+  `codi_acumulacio_ca` CHAR(6) NULL DEFAULT NULL COMMENT  /* comment truncated */ /*Codi de la candidatura d'acumulació a nivell de comunitat autònoma*/,
+  UNIQUE INDEX `uk_eleccions_partits` (`eleccio_id` ASC, `partit_id` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `eleccions_generals2`.`persones` (
+  `persona_id` INT(10) UNSIGNED NOT NULL,
+  `nom` VARCHAR(30) NULL DEFAULT NULL,
+  `cog1` VARCHAR(30) NULL DEFAULT NULL,
+  `cog2` VARCHAR(30) NULL DEFAULT NULL,
+  `sexe` ENUM('M', 'F') NULL DEFAULT NULL COMMENT  /* comment truncated */ /*M=Masculí, F=Femení*/,
+  `data_naixement` DATE NULL DEFAULT NULL,
+  `dni` CHAR(10) NOT NULL)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `eleccions_generals2`.`candidats` (
+  `candidat_id` BIGINT(19) UNSIGNED NOT NULL,
+  `num_ordre` TINYINT(4) NULL DEFAULT NULL COMMENT  /* comment truncated */ /*Num ordre del candidatdins la llista del partit dins de la circumpscripció que es presenta.*/,
+  `tipus` ENUM('T', 'S') NULL DEFAULT NULL COMMENT  /* comment truncated */ /*T=Titular, S=Suplent*/,
+  `provincia_id` TINYINT(3) UNSIGNED NOT NULL,
+  `persona_id` INT(10) UNSIGNED NOT NULL,
+  `candidatura_id` INT(10) UNSIGNED NOT NULL)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
