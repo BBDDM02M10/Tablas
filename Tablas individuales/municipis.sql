@@ -12,8 +12,10 @@ CREATE TABLE `provincies` (
   `comunitat_aut_id` TINYINT (3) UNSIGNED NOT NULL,
   CONSTRAINT PK_provincies PRIMARY KEY (`provincia_id`),
   CONSTRAINT FK_provincies_comunitats_autonomes FOREIGN KEY (`comunitat_aut_id`)
-    REFERENCES comunitats_autonomes(comunitat_aut_id)
+    REFERENCES comunitats_autonomes(`comunitat_aut_id`)
 );
+
+CREATE INDEX `gt_codi_ine_provincia` ON provincies (`codi_ine_provincia`);
 
 CREATE TABLE `municipis` (
   `municipi_id` SMALLINT(5) UNSIGNED AUTO_INCREMENT NOT NULL,
@@ -21,8 +23,8 @@ CREATE TABLE `municipis` (
   `codi_ine_municipi` CHAR(3) NULL DEFAULT NULL,
   `codi_ine_provincia` CHAR(2) NOT NULL,
   CONSTRAINT PK_municipis PRIMARY KEY (`municipi_id`),
-  CONSTRAINT FK_municipis_provincies FOREIGN KEY (codi_ine_provincia)
-    REFERENCES provincies(codi_ine_provincia)
+  CONSTRAINT FK_municipis_provincies FOREIGN KEY (`codi_ine_provincia`)
+    REFERENCES provincies(`codi_ine_provincia`)
 );
   
 CREATE TABLE `eleccions` (
@@ -33,6 +35,18 @@ CREATE TABLE `eleccions` (
   `data` TINYINT(2) NOT NULL ,
   UNIQUE INDEX `uk_eleccions_any_mes` USING BTREE (`any`, `mes`),
   CONSTRAINT PK_eleccions PRIMARY KEY (`eleccio_id`)
+);
+
+CREATE TABLE `candidatures` (
+  `candidatura_id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
+  `eleccio_id` TINYINT(3) UNSIGNED NOT NULL,
+  `nom_curt` VARCHAR(50) NULL DEFAULT NULL,
+  `nom_llarg` VARCHAR(100) NULL DEFAULT NULL,
+  `codi_acumulacio_provincia` CHAR(6) NULL DEFAULT NULL,
+  `codi_acumulacio_ca` CHAR(6) NULL DEFAULT NULL,
+  CONSTRAINT PK_candidatures_id PRIMARY KEY (`candidatura_id`),
+  CONSTRAINT FK_candidatures_eleccions FOREIGN KEY (`eleccio_id`)
+    REFERENCES eleccions(`eleccio_id`)
 );
 
 CREATE TABLE `candidats` (
@@ -49,30 +63,5 @@ CREATE TABLE `candidats` (
     REFERENCES provincies(provincia_id)
   );
 
-CREATE TABLE `candidatures` (
-  `candidatura_id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-  `eleccio_id` TINYINT(3) UNSIGNED NOT NULL,
-  `nom_curt` VARCHAR(50) NULL DEFAULT NULL,
-  `nom_llarg` VARCHAR(100) NULL DEFAULT NULL,
-  `codi_acumulacio_provincia` CHAR(6) NULL DEFAULT NULL,
-  `codi_acumulacio_ca` CHAR(6) NULL DEFAULT NULL,
-  CONSTRAINT PK_candidatures_id PRIMARY KEY (`candidatura_id`),
-  CONSTRAINT FK_candidatures_eleccions FOREIGN KEY (`eleccio_id`)
-    REFERENCES eleccions(`eleccio_id`)
-);
 
-CREATE TABLE `eleccions_municipis` (
-  `eleccio_municipi_id` INT(10) UNSIGNED AUTO_INCREMENT NOT NULL,
-  `eleccio_id` TINYINT(3) UNSIGNED NOT NULL,
-  `municipi_id` SMALLINT(5) UNSIGNED NOT NULL,
-  `num_meses` SMALLINT(5) UNSIGNED NULL DEFAULT NULL,
-  `poblacio` INT(10) UNSIGNED NULL DEFAULT NULL,
-  `cens` INT(10) UNSIGNED NULL DEFAULT NULL,
-  `vots_emesos` INT(10) UNSIGNED NULL DEFAULT NULL,
-  `vots_valids` INT(10) UNSIGNED NULL DEFAULT NULL,
-  `vots_candidatures` INT(10) UNSIGNED NULL DEFAULT NULL,
-  `vots_blanc` INT(10) UNSIGNED NULL DEFAULT NULL,
-  `vots_nuls` INT(10) UNSIGNED NULL DEFAULT NULL,
-  UNIQUE INDEX `uk_eleccions_municipis` (`eleccio_id` ASC, `municipi_id` ASC))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+
